@@ -1,8 +1,8 @@
 ---
 output: pdf_document
 title: Final Project Code Supplement
-author: Alex McKeever
-date: 
+author: Alex McKeever, Noah Lee, Lucas
+date: 3/14/2024
 ---
 
 ```{r, message = FALSE}
@@ -22,12 +22,23 @@ games <- read.csv("games.csv")
 ```
 
 ```{r}
-test <- by_player %>%
+player_data <- by_player %>%
   group_by(GAME_ID, TEAM_ID) %>%
   summarize(FGM = sum(FGM, na.rm = TRUE),
             FGA = sum(FGA, na.rm = TRUE),
-            FG3M = sum(FG3M, na.rm = TRUE)
-            ) %>%
+            FG3M = sum(FG3M, na.rm = TRUE),
+            FG3A = sum(FG3A, na.rm = TRUE),
+            FTM = sum(FTM, na.rm = TRUE),
+            FTA = sum(FTA, na.rm = TRUE),
+            OREB = sum(OREB, na.rm = TRUE),
+            DREB = sum(DREB, na.rm = TRUE),
+            total_reb = sum(REB, na.rm = TRUE),
+            AST = sum(AST, na.rm = TRUE),
+            STL = sum(STL, na.rm = TRUE),
+            BLK = sum(BLK, na.rm = TRUE),
+            TO = sum(TO, na.rm = TRUE),
+            PF = sum(PF, na.rm = TRUE),
+            PTS = sum(PTS, na.rm = TRUE),) %>%
   rename(team_id = TEAM_ID)
 ```
 
@@ -64,7 +75,8 @@ home_games <- home_games %>%
          ast_allowed = AST_ALLOWED,
          reb_allowed = REB_ALLOWED,
          win = HOME_TEAM_WINS,
-         team_id = HOME_TEAM_ID)
+         team_id = HOME_TEAM_ID) %>%
+    mutate(home_team = 1)
 ```
 
 ```{r}
@@ -79,7 +91,8 @@ away_games <- away_games %>%
          ast_allowed = AST_ALLOWED,
          reb_allowed = REB_ALLOWED,
          win = AWAY_TEAM_WINS,
-         team_id = VISITOR_TEAM_ID)
+         team_id = VISITOR_TEAM_ID) %>%
+  mutate(home_team = 0)
 ```
 
 ```{r}
@@ -87,6 +100,26 @@ games_data_complete <- rbind(home_games, away_games)
 ```
 
 ```{r}
-kl <- games_data_complete %>%
-  left_join(test, by = c("GAME_ID", "team_id"))
+final_data <- games_data_complete %>%
+  left_join(player_data, by = c("GAME_ID", "team_id"))
+```
+
+```{r}
+#Fitting our model
+model <- glm(win ~ FG3A + pts_allowed + FTA + OREB + DREB + SEASON + TO, data = final_data, family = "binomial")
+summary(model)
+```
+
+```{r}
+#model_aug <- augment(model, final_data) |>
+#      mutate(resid = resid(model, type = "response"))
+
+#arm::binnedplot(model_aug$FG3A, model_aug$resid, xlab = "age", col.int = NULL)
+#arm::binnedplot(model_aug$pts_allowed, model_aug$resid, xlab = "year", col.int = NULL)
+#arm::binnedplot(model_aug$FTA, model_aug$resid, xlab = "checks", col.int = NULL)
+#arm::binnedplot(model_aug$OREB, model_aug$resid, xlab = "age", col.int = NULL)
+#arm::binnedplot(model_aug$DREB, model_aug$resid, xlab = "year", col.int = NULL)
+#arm::binnedplot(model_aug$SEASON, model_aug$resid, xlab = "checks", col.int = NULL)
+#arm::binnedplot(model_aug$TO, model_aug$resid, xlab = "age", col.int = NULL)
+
 ```
