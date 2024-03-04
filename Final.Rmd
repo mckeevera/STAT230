@@ -1,0 +1,26 @@
+---
+output: pdf_document
+title: Final Project Code Supplement
+author: Alex McKeever
+date: 
+---
+
+```{r, message = FALSE}
+#Loading in required packages for the following code
+library(mosaic)
+library(dplyr)
+library(ggplot2)
+library(broom)
+library(GGally)
+library(car)
+library(ggeffects)
+```
+
+```{r}
+by_player <- read.csv("games_details.csv")
+```
+
+```{r}
+by_player %>%
+  group_by(GAME_ID, )
+```
