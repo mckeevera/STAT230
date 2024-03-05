@@ -55,6 +55,9 @@ MULTI COLLINEARITY:
 ```{r}
 final_data |> 
   ggpairs(columns = c("win", "FG3A", "pts_allowed", "FTA", "OREB", "DREB", "TO", "SEASON"))
+```
+
+```{r}
 vif(nba_glm)
 ```
 No evidence of significant multicollinearity.
