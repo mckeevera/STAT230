@@ -57,7 +57,17 @@ final_data |>
   ggpairs(columns = c("win", "FG3A", "pts_allowed", "FTA", "OREB", "DREB", "TO", "SEASON"))
 vif(nba_glm)
 ```
+No evidence of significant multicollinearity.
 
+OUTLIERS:
+```{r}
+plot(rstandard(nba_glm), main="Standardized Residuals", ylab="Standardized Residuals", xlab="Index")
+plot(hatvalues(nba_glm), main="Hat Values", ylab="Standardized Residuals", xlab="Index")
+plot(cooks.distance(nba_glm), main="Cooks D", ylab="Standardized Residuals", xlab="Index") 
+cooks_d <- cooks.distance(nba_glm)
+influential_obs <- which(cooks_d > 0.0015)
+print(influential_obs) # gameid = 10600015, 20700065
+```
 
 
 PLOTS:
