@@ -105,21 +105,26 @@ final_data <- games_data_complete %>%
 ```
 
 ```{r}
+final_data <- final_data %>%
+  mutate(pts_allowed_log = log(pts_allowed))
+```
+
+```{r}
 #Fitting our model
-model <- glm(win ~ FG3A + pts_allowed + FTA + OREB + DREB + SEASON + TO, data = final_data, family = "binomial")
+model <- glm(win ~ FG3A + pts_allowed_log + FTA + OREB + DREB + SEASON + TO, data = final_data, family = "binomial")
 summary(model)
 ```
 
 ```{r}
-#model_aug <- augment(model, final_data) |>
-#      mutate(resid = resid(model, type = "response"))
+model_aug <- augment(model) |>
+      mutate(resid = resid(model, type = "response"))
 
-#arm::binnedplot(model_aug$FG3A, model_aug$resid, xlab = "age", col.int = NULL)
-#arm::binnedplot(model_aug$pts_allowed, model_aug$resid, xlab = "year", col.int = NULL)
-#arm::binnedplot(model_aug$FTA, model_aug$resid, xlab = "checks", col.int = NULL)
-#arm::binnedplot(model_aug$OREB, model_aug$resid, xlab = "age", col.int = NULL)
-#arm::binnedplot(model_aug$DREB, model_aug$resid, xlab = "year", col.int = NULL)
-#arm::binnedplot(model_aug$SEASON, model_aug$resid, xlab = "checks", col.int = NULL)
-#arm::binnedplot(model_aug$TO, model_aug$resid, xlab = "age", col.int = NULL)
+arm::binnedplot(model_aug$FG3A, model_aug$resid, xlab = "age", col.int = NULL)
+arm::binnedplot(model_aug$pts_allowed_log, model_aug$resid, xlab = "year", col.int = NULL)
+arm::binnedplot(model_aug$FTA, model_aug$resid, xlab = "checks", col.int = NULL)
+arm::binnedplot(model_aug$OREB, model_aug$resid, xlab = "age", col.int = NULL)
+arm::binnedplot(model_aug$DREB, model_aug$resid, xlab = "year", col.int = NULL)
+arm::binnedplot(model_aug$SEASON, model_aug$resid, xlab = "checks", col.int = NULL)
+arm::binnedplot(model_aug$TO, model_aug$resid, xlab = "age", col.int = NULL)
 
 ```
