@@ -38,8 +38,9 @@ gf_histogram(~FG3A, data=final_data)
 ```
 
 ```{r}
-gf_jitter(FG3A~SEASON, data=final_data) %>% gf_lm()
-gf_jitter(pts_allowed~SEASON, data=final_data) %>% gf_lm()
+gf_jitter(FG3A~SEASON, data=final_data) %>% gf_lm() + 
+  labs(x="Season", y="3-point Field Goals Attempted", title="Number of 3-Point field goals attempted in-game over different seasons") + theme_bw()
+gf_jitter(pts_allowed~SEASON, data=final_data) %>% gf_lm() 
 ```
 
 ```{r}
@@ -71,7 +72,6 @@ cooks_d <- cooks.distance(nba_glm)
 influential_obs <- which(cooks_d > 0.0015)
 print(influential_obs) # gameid = 10600015, 20700065
 ```
-
 
 PLOTS:
 win v 3PA:
