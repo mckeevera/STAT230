@@ -15,6 +15,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 
+
 ```{r}
 library(mosaic)
 library(ggformula)
@@ -45,12 +46,19 @@ gf_jitter(pts_allowed~SEASON, data=final_data) %>% gf_lm()
 gf_jitter(FG3A~pts_allowed, data=final_data) %>% gf_lm()
 ```
 
-
 MODEL:
 ```{r}
-nba_glm <- glm(win ~ FG3A  + pts_allowed + FTA  + OREB + DREB + TO + SEASON, data = final_data, family = "binomial")
+nba_glm <- glm(win ~ FG3A  + log(pts_allowed) + FTA  + OREB + DREB + TO + SEASON, data = final_data, family = "binomial")
 summary(nba_glm)
 ```
+MULTI COLLINEARITY:
+```{r}
+final_data |> 
+  ggpairs(columns = c("win", "FG3A", "pts_allowed", "FTA", "OREB", "DREB", "TO", "SEASON"))
+vif(nba_glm)
+```
+
+
 
 PLOTS:
 win v 3PA:
@@ -98,9 +106,27 @@ plot(lm_preds, show_data = TRUE) +
   labs(title="Predicted Probability of winning based on 3 points shot and points allowed", x="3FGA", y="Predicted probability of winning")
 ```
 
+RESIDUAL PLOTS:
+```{r}
+nba_res <- augment(nba_glm, type.predict= "response") |>
+  dplyr::mutate(.resp.resid = resid(nba_glm, type= "response"))
+
+# Avg. resids vs. predicted values
+arm::binnedplot(nba_glm$linear.predictors, nba_res$.resp.resid, 
+                xlab = "Predicted odds", 
+                main = "Binned Residual vs. Predicted Values", 
+                col.int = FALSE)
+```
 
 ```{r}
-p_lrm <- lrm(win ~ FG3A  + pts_allowed + FTA  + OREB + DREB + TO, data = final_data)
+model_aug <-augment(model) |>
+  mutate(resid = resid(model, type="response"))
+arm::binnedplot(model_aug$FG3A, model_aug$resid, xlab="FG3A", col.int=NULL)
+```
+
+
+```{r}
+p_lrm <- lrm(win ~ FG3A  + log(pts_allowed) + FTA  + OREB + DREB + TO, data = final_data) #SEASON IS NOT INCLUDED
 p_lrm$stats[c("Dxy", "Gamma", "Tau-a")]
 ```
 
