@@ -1,0 +1,41 @@
+---
+title: "STAT230 Final Project"
+author: "Noah, Alex, Lucas"
+date: "2024-03-04"
+output:
+  pdf_document: default
+  html_document: default
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r}
+library(mosaic)
+library(ggformula)
+library(car)
+library(GGally)
+library(broom)
+library(ggeffects)
+library(effects)
+library(tidyr)
+library(ggplot2)
+```
+
+
+3 POINT ATTEMPTED UNIVARIATE PLOT:
+- RIGHT SKEW
+```{r}
+gf_boxplot(~FG3A, data=final_data)
+gf_histogram(~FG3A, data=final_data)
+```
+
+```{r}
+gf_jitter(FG3A~SEASON, data=final_data)
+gf_jitter(pts_allowed~SEASON, data=final_data)
+```
