@@ -40,11 +40,10 @@ gf_histogram(~FG3A, data=final_data)
 ```{r}
 gf_jitter(FG3A~SEASON, data=final_data) %>% gf_lm() + 
   labs(x="Season", y="3-point Field Goals Attempted", title="Number of 3-Point field goals attempted in-game over different seasons") + theme_bw()
-gf_jitter(pts_allowed~SEASON, data=final_data) %>% gf_lm() 
 ```
 
 ```{r}
-gf_jitter(FG3A~pts_allowed, data=final_data) %>% gf_lm()
+gf_jitter(FG3A~pts_allowed, data=final_data) %>% gf_lm()+ theme_bw()
 ```
 
 MODEL:
@@ -116,7 +115,7 @@ plot(lm_preds, show_data = TRUE) +
 ```{r}
 lm_preds <- ggpredict(nba_glm, terms = c("FG3A", "pts_allowed"))
 plot(lm_preds, show_data = TRUE) + 
-  labs(title="Predicted Probability of winning based on 3 points shot and points allowed", x="3FGA", y="Predicted probability of winning")
+  labs(title="Predicted Probability of winning based on 3 pointers attempted and points allowed", x="3-point field goals attempted", y="Predicted probability of winning")
 ```
 
 RESIDUAL PLOTS:
