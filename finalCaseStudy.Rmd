@@ -112,6 +112,7 @@ plot(lm_preds, show_data = TRUE) +
   labs(title="Predicted Probability of winning based on TO", x="TO", y="Predicted probability of winning")
 ```
 
+
 ```{r}
 lm_preds <- ggpredict(nba_glm, terms = c("FG3A", "pts_allowed"))
 plot(lm_preds, show_data = TRUE) + 
