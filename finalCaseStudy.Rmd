@@ -48,7 +48,7 @@ gf_jitter(FG3A~pts_allowed, data=final_data) %>% gf_lm()
 
 MODEL:
 ```{r}
-nba_glm <- glm(win ~ FG3A  + log(pts_allowed) + FTA  + OREB + DREB + TO + SEASON, data = final_data, family = "binomial")
+nba_glm <- glm(win ~ FG3A  + log(pts_allowed) + FTA  + OREB + DREB + TO + SEASON + FG3A:SEASON, data = final_data, family = "binomial")
 summary(nba_glm)
 ```
 MULTI COLLINEARITY:
