@@ -50,6 +50,7 @@ MODEL:
 ```{r}
 nba_glm <- glm(win ~ FG3A  + log(pts_allowed) + FTA  + OREB + DREB + TO + SEASON + FG3A:SEASON, data = final_data, family = "binomial")
 summary(nba_glm)
+1 - pchisq(53647, 53095)
 ```
 MULTI COLLINEARITY:
 ```{r}
