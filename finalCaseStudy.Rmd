@@ -60,7 +60,7 @@ summary(nba_glm)
 ```{r}
 nba_glm2 <- glm(win ~ FG3A + fg3_pct  + log(pts_allowed) + FTA  + reb + TO + SEASON + FG3A:SEASON + log(pts_allowed):SEASON, data = final_data, family = "binomial")
 summary(nba_glm2)
-1 - pchisq(43421, 53094) #INADEQUACY
+1 - pchisq(45192, 53094) #ADEQUATE
 ```
 
 
@@ -71,7 +71,7 @@ final_data |>
 ```
 
 ```{r}
-vif(nba_glm)
+vif(nba_glm2)
 ```
 No evidence of significant multicollinearity with non-interaction terms.
 
@@ -106,20 +106,9 @@ win v free throws attempted
 ```{r}
 lm_preds <- ggpredict(nba_glm2, terms = c("FG3A", "fg3_pct"))
 plot(lm_preds, show_data = TRUE) + 
-  labs(title="Predicted Probability of winning based on FTA", x="FG3A", y="Predicted probability of winning")
+  labs(title="Predicted Probability of winning based on 3FGA and Percentage", x="FG3A", y="Predicted probability of winning")
 ```
-win v OREB
-```{r}
-lm_preds <- ggpredict(nba_glm, terms = c("OREB"))
-plot(lm_preds, show_data = TRUE) + 
-  labs(title="Predicted Probability of winning based on OREB", x="OREB", y="Predicted probability of winning")
-```
-win v DREB
-```{r}
-lm_preds <- ggpredict(nba_glm, terms = c("DREB"))
-plot(lm_preds, show_data = TRUE) + 
-  labs(title="Predicted Probability of winning based on DREB", x="DREB", y="Predicted probability of winning")
-```
+
 win v TO
 ```{r}
 lm_preds <- ggpredict(nba_glm, terms = c("TO"))
@@ -129,10 +118,17 @@ plot(lm_preds, show_data = TRUE) +
 
 
 ```{r}
-lm_preds <- ggpredict(nba_glm, terms = c("FG3A", "pts_allowed"))
+lm_preds <- ggpredict(nba_glm2, terms = c("FG3A", "pts_allowed"))
 plot(lm_preds, show_data = TRUE) + 
   labs(title="Predicted Probability of winning based on 3 pointers attempted and points allowed", x="3-point field goals attempted", y="Predicted probability of winning")
 ```
+
+```{r}
+lm_preds <- ggpredict(nba_glm2, terms = c("fg3_pct", "pts_allowed"))
+plot(lm_preds, show_data = TRUE) + 
+  labs(title="Predicted Probability of winning based on 3 pointers attempted and points allowed", x="3-point field goal percentage", y="Predicted probability of winning")
+```
+
 
 RESIDUAL PLOTS:
 ```{r}
