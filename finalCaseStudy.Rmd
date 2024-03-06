@@ -25,7 +25,79 @@ library(effects)
 library(tidyr)
 library(ggplot2)
 library(rms)
+```
 
+```{r}
+by_player <- read.csv("games_details.csv")
+games <- read.csv("games.csv")
+player_data <- by_player %>%
+  group_by(GAME_ID, TEAM_ID) %>%
+  summarize(FGM = sum(FGM, na.rm = TRUE),
+            FGA = sum(FGA, na.rm = TRUE),
+            FG3M = sum(FG3M, na.rm = TRUE),
+            FG3A = sum(FG3A, na.rm = TRUE),
+            FTM = sum(FTM, na.rm = TRUE),
+            FTA = sum(FTA, na.rm = TRUE),
+            OREB = sum(OREB, na.rm = TRUE),
+            DREB = sum(DREB, na.rm = TRUE),
+            total_reb = sum(REB, na.rm = TRUE),
+            AST = sum(AST, na.rm = TRUE),
+            STL = sum(STL, na.rm = TRUE),
+            BLK = sum(BLK, na.rm = TRUE),
+            TO = sum(TO, na.rm = TRUE),
+            PF = sum(PF, na.rm = TRUE),
+            PTS = sum(PTS, na.rm = TRUE),) %>%
+  rename(team_id = TEAM_ID)
+games <- games %>% 
+  mutate(AWAY_TEAM_WINS = 1 - HOME_TEAM_WINS)
+```
+
+```{r}
+home_games <- games[,c(1,2,4,6,8,9,10,11,12,13,15,19,20,21)] %>%
+  rename(PTS_ALLOWED = PTS_away,
+         REB_ALLOWED = REB_away,
+         AST_ALLOWED = AST_away
+         )
+away_games <- games[,c(1,2,5,6,8,12,13,15,16,17,18,19,20,22)] %>%
+  rename(PTS_ALLOWED = PTS_home,
+         REB_ALLOWED = REB_home,
+         AST_ALLOWED = AST_home
+         )
+```
+
+```{r}
+home_games <- home_games %>%
+  rename(points = PTS_home,
+         fg_pct = FG_PCT_home,
+         ft_pct = FT_PCT_home,
+         fg3_pct = FG3_PCT_home,
+         ast = AST_home,
+         reb = REB_home,
+         pts_allowed = PTS_ALLOWED,
+         ast_allowed = AST_ALLOWED,
+         reb_allowed = REB_ALLOWED,
+         win = HOME_TEAM_WINS,
+         team_id = HOME_TEAM_ID) %>%
+    mutate(home_team = 1)
+away_games <- away_games %>%
+  rename(points = PTS_away,
+         fg_pct = FG_PCT_away,
+         ft_pct = FT_PCT_away,
+         fg3_pct = FG3_PCT_away,
+         ast = AST_away,
+         reb = REB_away,
+         pts_allowed = PTS_ALLOWED,
+         ast_allowed = AST_ALLOWED,
+         reb_allowed = REB_ALLOWED,
+         win = AWAY_TEAM_WINS,
+         team_id = VISITOR_TEAM_ID) %>%
+  mutate(home_team = 0)
+```
+
+```{r}
+games_data_complete <- rbind(home_games, away_games)
+final_data <- games_data_complete %>%
+  left_join(player_data, by = c("GAME_ID", "team_id"))
 final_data <- final_data %>%
   mutate(pts_allowed_log = log(pts_allowed))
 ```
