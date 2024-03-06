@@ -14,8 +14,6 @@ editor_options:
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-
-
 ```{r}
 library(mosaic)
 library(ggformula)
@@ -29,9 +27,8 @@ library(ggplot2)
 library(rms)
 ```
 
+3 POINT ATTEMPTED UNIVARIATE PLOT: - RIGHT SKEW
 
-3 POINT ATTEMPTED UNIVARIATE PLOT:
-- RIGHT SKEW
 ```{r}
 gf_boxplot(~FG3A, data=final_data)
 gf_histogram(~FG3A, data=final_data)
@@ -45,12 +42,13 @@ gf_jitter(FG3A~SEASON, data=final_data) %>% gf_lm() +
 ```{r}
 gf_jitter(FG3A~pts_allowed, data=final_data) %>% gf_lm()+ theme_bw()
 ```
+
 ```{r}
 gf_jitter(fg3_pct~FG3A, data=final_data) %>% gf_lm()+ theme_bw()
 ```
 
-
 MODEL:
+
 ```{r}
 nba_glm <- glm(win ~ FG3A  + log(pts_allowed) + FTA  + OREB + DREB + TO + SEASON + FG3A:SEASON, data = final_data, family = "binomial")
 summary(nba_glm)
@@ -63,8 +61,8 @@ summary(nba_glm2)
 1 - pchisq(43421, 53094) #INADEQUACY
 ```
 
-
 MULTI COLLINEARITY:
+
 ```{r}
 final_data |> 
   ggpairs(columns = c("win", "FG3A", "fg3_pct", "pts_allowed", "FTA", "reb", "TO", "SEASON"))
@@ -73,9 +71,11 @@ final_data |>
 ```{r}
 vif(nba_glm)
 ```
+
 No evidence of significant multicollinearity with non-interaction terms.
 
 OUTLIERS:
+
 ```{r}
 plot(rstandard(nba_glm2), main="Standardized Residuals", ylab="Standardized Residuals", xlab="Index")
 plot(hatvalues(nba_glm2), main="Hat Values", ylab="Standardized Residuals", xlab="Index")
@@ -85,48 +85,53 @@ influential_obs <- which(cooks_d > 0.0015)
 print(influential_obs) # gameid = 10600015, 20700065
 ```
 
-PLOTS:
-win v 3PA:
+PLOTS: win v 3PA:
+
 ```{r}
 lm_preds <- ggpredict(nba_glm2, terms = c("FG3A"))
 plot(lm_preds, show_data = TRUE) + 
   labs(title="Predicted Probability of winning based on 3 points shot", x="3FGA", y="Predicted probability of winning")
 ```
 
-
 win v pts allowed:
+
 ```{r}
 lm_preds <- ggpredict(nba_glm2, terms = c("pts_allowed"))
 plot(lm_preds, show_data = TRUE) + 
   labs(title="Predicted Probability of winning based on pts_allowed", x="pts_allowed", y="Predicted probability of winning")
 ```
 
-
 win v free throws attempted
+
 ```{r}
 lm_preds <- ggpredict(nba_glm2, terms = c("FG3A", "fg3_pct"))
 plot(lm_preds, show_data = TRUE) + 
   labs(title="Predicted Probability of winning based on FTA", x="FG3A", y="Predicted probability of winning")
 ```
+
 win v OREB
+
 ```{r}
 lm_preds <- ggpredict(nba_glm, terms = c("OREB"))
 plot(lm_preds, show_data = TRUE) + 
   labs(title="Predicted Probability of winning based on OREB", x="OREB", y="Predicted probability of winning")
 ```
+
 win v DREB
+
 ```{r}
 lm_preds <- ggpredict(nba_glm, terms = c("DREB"))
 plot(lm_preds, show_data = TRUE) + 
   labs(title="Predicted Probability of winning based on DREB", x="DREB", y="Predicted probability of winning")
 ```
+
 win v TO
+
 ```{r}
 lm_preds <- ggpredict(nba_glm, terms = c("TO"))
 plot(lm_preds, show_data = TRUE) + 
   labs(title="Predicted Probability of winning based on TO", x="TO", y="Predicted probability of winning")
 ```
-
 
 ```{r}
 lm_preds <- ggpredict(nba_glm, terms = c("FG3A", "pts_allowed"))
@@ -135,6 +140,7 @@ plot(lm_preds, show_data = TRUE) +
 ```
 
 RESIDUAL PLOTS:
+
 ```{r}
 nba_res <- augment(nba_glm, type.predict= "response") |>
   dplyr::mutate(.resp.resid = resid(nba_glm, type= "response"))
@@ -152,10 +158,7 @@ model_aug <-augment(model) |>
 arm::binnedplot(model_aug$FG3A, model_aug$resid, xlab="FG3A", col.int=NULL)
 ```
 
-
 ```{r}
 p_lrm <- lrm(win ~ FG3A  + log(pts_allowed) + FTA  + OREB + DREB + TO, data = final_data) #SEASON IS NOT INCLUDED
 p_lrm$stats[c("Dxy", "Gamma", "Tau-a")]
 ```
-
-
