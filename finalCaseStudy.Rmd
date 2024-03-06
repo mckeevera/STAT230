@@ -45,30 +45,42 @@ gf_jitter(FG3A~SEASON, data=final_data) %>% gf_lm() +
 ```{r}
 gf_jitter(FG3A~pts_allowed, data=final_data) %>% gf_lm()+ theme_bw()
 ```
+```{r}
+gf_jitter(fg3_pct~FG3A, data=final_data) %>% gf_lm()+ theme_bw()
+```
+
 
 MODEL:
 ```{r}
 nba_glm <- glm(win ~ FG3A  + log(pts_allowed) + FTA  + OREB + DREB + TO + SEASON + FG3A:SEASON, data = final_data, family = "binomial")
 summary(nba_glm)
-1 - pchisq(53647, 53095)
+1 - pchisq(53647, 53095) #INADEQUACY
 ```
+
+```{r}
+nba_glm2 <- glm(win ~ FG3A + fg3_pct  + log(pts_allowed) + FTA  + reb + TO + SEASON + FG3A:SEASON + log(pts_allowed):SEASON, data = final_data, family = "binomial")
+summary(nba_glm2)
+1 - pchisq(43421, 53094) #INADEQUACY
+```
+
+
 MULTI COLLINEARITY:
 ```{r}
 final_data |> 
-  ggpairs(columns = c("win", "FG3A", "pts_allowed", "FTA", "OREB", "DREB", "TO", "SEASON"))
+  ggpairs(columns = c("win", "FG3A", "fg3_pct", "pts_allowed", "FTA", "reb", "TO", "SEASON"))
 ```
 
 ```{r}
 vif(nba_glm)
 ```
-No evidence of significant multicollinearity.
+No evidence of significant multicollinearity with non-interaction terms.
 
 OUTLIERS:
 ```{r}
-plot(rstandard(nba_glm), main="Standardized Residuals", ylab="Standardized Residuals", xlab="Index")
-plot(hatvalues(nba_glm), main="Hat Values", ylab="Standardized Residuals", xlab="Index")
-plot(cooks.distance(nba_glm), main="Cooks D", ylab="Standardized Residuals", xlab="Index") 
-cooks_d <- cooks.distance(nba_glm)
+plot(rstandard(nba_glm2), main="Standardized Residuals", ylab="Standardized Residuals", xlab="Index")
+plot(hatvalues(nba_glm2), main="Hat Values", ylab="Standardized Residuals", xlab="Index")
+plot(cooks.distance(nba_glm2), main="Cooks D", ylab="Standardized Residuals", xlab="Index") 
+cooks_d <- cooks.distance(nba_glm2)
 influential_obs <- which(cooks_d > 0.0015)
 print(influential_obs) # gameid = 10600015, 20700065
 ```
@@ -76,7 +88,7 @@ print(influential_obs) # gameid = 10600015, 20700065
 PLOTS:
 win v 3PA:
 ```{r}
-lm_preds <- ggpredict(nba_glm, terms = c("FG3A"))
+lm_preds <- ggpredict(nba_glm2, terms = c("FG3A"))
 plot(lm_preds, show_data = TRUE) + 
   labs(title="Predicted Probability of winning based on 3 points shot", x="3FGA", y="Predicted probability of winning")
 ```
@@ -84,15 +96,17 @@ plot(lm_preds, show_data = TRUE) +
 
 win v pts allowed:
 ```{r}
-lm_preds <- ggpredict(nba_glm, terms = c("pts_allowed"))
+lm_preds <- ggpredict(nba_glm2, terms = c("pts_allowed"))
 plot(lm_preds, show_data = TRUE) + 
   labs(title="Predicted Probability of winning based on pts_allowed", x="pts_allowed", y="Predicted probability of winning")
 ```
+
+
 win v free throws attempted
 ```{r}
-lm_preds <- ggpredict(nba_glm, terms = c("FTA"))
+lm_preds <- ggpredict(nba_glm2, terms = c("FG3A", "fg3_pct"))
 plot(lm_preds, show_data = TRUE) + 
-  labs(title="Predicted Probability of winning based on FTA", x="FTA", y="Predicted probability of winning")
+  labs(title="Predicted Probability of winning based on FTA", x="FG3A", y="Predicted probability of winning")
 ```
 win v OREB
 ```{r}
