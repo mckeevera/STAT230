@@ -15,6 +15,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 ```{r}
+# Loading in required libraries
 library(mosaic)
 library(ggformula)
 library(car)
@@ -28,8 +29,11 @@ library(rms)
 ```
 
 ```{r}
+# Loading in data
 by_player <- read.csv("games_details.csv")
 games <- read.csv("games.csv")
+
+# Converting player data in each game to be team data in each game
 player_data <- by_player %>%
   group_by(GAME_ID, TEAM_ID) %>%
   summarize(FGM = sum(FGM, na.rm = TRUE),
@@ -48,16 +52,21 @@ player_data <- by_player %>%
             PF = sum(PF, na.rm = TRUE),
             PTS = sum(PTS, na.rm = TRUE),) %>%
   rename(team_id = TEAM_ID)
+
+# Making an indicator variable for if the away team wins the game
 games <- games %>% 
   mutate(AWAY_TEAM_WINS = 1 - HOME_TEAM_WINS)
 ```
 
 ```{r}
+# Extracting variables pertinent for the home team
 home_games <- games[,c(1,2,4,6,8,9,10,11,12,13,15,19,20,21)] %>%
   rename(PTS_ALLOWED = PTS_away,
          REB_ALLOWED = REB_away,
          AST_ALLOWED = AST_away
          )
+
+# Extracting variables pertinent for the away team
 away_games <- games[,c(1,2,5,6,8,12,13,15,16,17,18,19,20,22)] %>%
   rename(PTS_ALLOWED = PTS_home,
          REB_ALLOWED = REB_home,
@@ -66,6 +75,7 @@ away_games <- games[,c(1,2,5,6,8,12,13,15,16,17,18,19,20,22)] %>%
 ```
 
 ```{r}
+# Making variable names uniform
 home_games <- home_games %>%
   rename(points = PTS_home,
          fg_pct = FG_PCT_home,
@@ -78,7 +88,10 @@ home_games <- home_games %>%
          reb_allowed = REB_ALLOWED,
          win = HOME_TEAM_WINS,
          team_id = HOME_TEAM_ID) %>%
+  # Creating a home team variable
     mutate(home_team = 1)
+
+# Making variable names uniform
 away_games <- away_games %>%
   rename(points = PTS_away,
          fg_pct = FG_PCT_away,
@@ -91,13 +104,19 @@ away_games <- away_games %>%
          reb_allowed = REB_ALLOWED,
          win = AWAY_TEAM_WINS,
          team_id = VISITOR_TEAM_ID) %>%
+    # Creating an away team variable
   mutate(home_team = 0)
 ```
 
 ```{r}
+# Binding home and away data
 games_data_complete <- rbind(home_games, away_games)
+
+# Joining the additional data
 final_data <- games_data_complete %>%
   left_join(player_data, by = c("GAME_ID", "team_id"))
+
+# Creating a log(point allowed) variable for easier use
 final_data <- final_data %>%
   mutate(pts_allowed_log = log(pts_allowed))
 ```
