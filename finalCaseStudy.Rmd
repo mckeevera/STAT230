@@ -121,29 +121,31 @@ final_data <- final_data %>%
   mutate(pts_allowed_log = log(pts_allowed))
 ```
 
-3 POINT ATTEMPTED UNIVARIATE PLOT: - RIGHT SKEW
+### **Exploratory Data Analysis**
 
-```{r}
+```{r, warning = FALSE}
+# Creating graphics of the number of attempted 3 point shots in each game
 gf_boxplot(~FG3A, data=final_data) + 
   theme_bw()
 gf_histogram(~FG3A, data=final_data) + 
   theme_bw()
 ```
 
-```{r}
+```{r, warning = FALSE}
+# Figure 1
 gf_jitter(FG3A~SEASON, data=final_data) %>% gf_lm() + 
-  labs(x="Season", y="3-point Field Goals Attempted", title="Number of 3-Point field goals attempted in-game over different seasons") + theme_bw()
+  labs(x="Season", y="3-point Field Goals Attempted", 
+       title="Number of 3-Point field goals attempted in-game over different seasons") +      theme_bw()
 ```
 
 ```{r}
+# Additional plots exploring the data
 gf_jitter(FG3A~pts_allowed, data=final_data) %>% gf_lm()+ theme_bw()
-```
-
-```{r}
 gf_jitter(fg3_pct~FG3A, data=final_data) %>% gf_lm()+ theme_bw()
+gf_jitter(pts_allowed~SEASON, data=final_data) %>% gf_lm()+ theme_bw()
 ```
 
-MODEL:
+### **Fitting the Model, Wald's Tests, Deviance GoF test**
 
 ```{r}
 nba_glm <- glm(win ~ FG3A  + log(pts_allowed) + FTA  + OREB + DREB + TO + SEASON + FG3A:SEASON, data = final_data, family = "binomial")
@@ -152,9 +154,20 @@ summary(nba_glm)
 ```
 
 ```{r}
+# Fitting the model
 nba_glm2 <- glm(win ~ FG3A + fg3_pct  + pts_allowed_log + FTA  + reb + TO + SEASON + FG3A:SEASON + log(pts_allowed):SEASON, data = final_data, family = "binomial")
 summary(nba_glm2)
-1 - pchisq(45192, 53094) #ADEQUATE
+```
+
+| Variable | Coefficient  | Wald's Test p-value |
+|----------|--------------|---------------------|
+|          |              |                     |
+|          |              |                     |
+|          |              |                     |
+
+```{r}
+# Goodness of Fit test for the second logistic model that indicates our model is adequate
+1 - pchisq(45192, 53094)
 ```
 
 MULTI COLLINEARITY:
