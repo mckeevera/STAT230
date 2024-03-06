@@ -106,10 +106,7 @@ win v free throws attempted
 ```{r}
 lm_preds <- ggpredict(nba_glm2, terms = c("FG3A", "fg3_pct"))
 plot(lm_preds, show_data = TRUE) + 
-<<<<<<< HEAD
-  labs(title="Predicted Probability of winning based on 3FGA and Percentage", x="FG3A", y="Predicted probability of winning")
-=======
-  labs(title="Predicted Probability of winning based on FTA", x="FG3A", y="Predicted probability of winning")
+labs(title="Predicted Probability of winning based on 3FGA and Percentage", x="FG3A", y="Predicted probability of winning")
 ```
 
 win v OREB
@@ -148,7 +145,6 @@ lm_preds <- ggpredict(nba_glm2, terms = c("fg3_pct", "pts_allowed"))
 plot(lm_preds, show_data = TRUE) + 
   labs(title="Predicted Probability of winning based on 3 pointers attempted and points allowed", x="3-point field goal percentage", y="Predicted probability of winning")
 ```
-
 
 RESIDUAL PLOTS:
 
