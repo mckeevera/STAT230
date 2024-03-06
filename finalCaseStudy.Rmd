@@ -14,7 +14,7 @@ editor_options:
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-```{r}
+```{r library}
 # Loading in required libraries
 library(mosaic)
 library(ggformula)
@@ -28,7 +28,7 @@ library(ggplot2)
 library(rms)
 ```
 
-```{r}
+```{r, loading data}
 # Loading in data
 by_player <- read.csv("games_details.csv")
 games <- read.csv("games.csv")
@@ -58,7 +58,7 @@ games <- games %>%
   mutate(AWAY_TEAM_WINS = 1 - HOME_TEAM_WINS)
 ```
 
-```{r}
+```{r splitting data}
 # Extracting variables pertinent for the home team
 home_games <- games[,c(1,2,4,6,8,9,10,11,12,13,15,19,20,21)] %>%
   rename(PTS_ALLOWED = PTS_away,
@@ -74,7 +74,7 @@ away_games <- games[,c(1,2,5,6,8,12,13,15,16,17,18,19,20,22)] %>%
          )
 ```
 
-```{r}
+```{r mutating data}
 # Making variable names uniform
 home_games <- home_games %>%
   rename(points = PTS_home,
@@ -108,7 +108,7 @@ away_games <- away_games %>%
   mutate(home_team = 0)
 ```
 
-```{r}
+```{r, binding and completing data}
 # Binding home and away data
 games_data_complete <- rbind(home_games, away_games)
 
@@ -170,28 +170,66 @@ summary(nba_glm2)
 1 - pchisq(45192, 53094)
 ```
 
-MULTI COLLINEARITY:
+### **Checking Model Assumptions**
 
-```{r}
+```{r, message = FALSE, warning = FALSE}
+# Checking for correlations between variables that could result in multicollinearity
 final_data |> 
-  ggpairs(columns = c("win", "FG3A", "fg3_pct", "pts_allowed", "FTA", "reb", "TO", "SEASON"))
+  ggpairs(columns = c("win", "FG3A", "fg3_pct", "pts_allowed_log", "FTA", "reb", "TO", "SEASON"))
 ```
 
 ```{r}
+# Checking the Variance Inflation Factor
 vif(nba_glm2)
+# We find no evidence of significant multicollinearity with non-interaction terms.
 ```
 
-No evidence of significant multicollinearity with non-interaction terms.
-
-OUTLIERS:
-
 ```{r}
+# Checking for outliers in our data
+
+# Standardized residuals seem to be mostly between -2 and 2
 plot(rstandard(nba_glm2), main="Standardized Residuals", ylab="Standardized Residuals", xlab="Index")
+
+# Hat values are very small
 plot(hatvalues(nba_glm2), main="Hat Values", ylab="Standardized Residuals", xlab="Index")
+
+# Cook's distances all are very small as well
 plot(cooks.distance(nba_glm2), main="Cooks D", ylab="Standardized Residuals", xlab="Index") 
+
+# The 'influential' games are the games with game ids 10600015 and 20700065 which, when looking at the data, do not really seem to be outliers
 cooks_d <- cooks.distance(nba_glm2)
 influential_obs <- which(cooks_d > 0.0015)
-print(influential_obs) # gameid = 10600015, 20700065
+print(influential_obs) 
+```
+
+```{r Binned Residual Plots}
+
+# Augmenting Data
+nba_res <- augment(nba_glm2, type.predict= "response") |>
+  dplyr::mutate(.resp.resid = resid(nba_glm2, type= "response"))
+
+# Avg. resids vs. predicted values
+arm::binnedplot(nba_glm2$linear.predictors, nba_res$.resp.resid, 
+                xlab = "Predicted odds", 
+                main = "Binned Residual vs. Predicted Values", 
+                col.int = FALSE)
+
+# Individual Binned Residual Plots
+arm::binnedplot(nba_res$FG3A, nba_res$.resp.resid, xlab = "FG3A", col.int = NULL)
+arm::binnedplot(nba_res$pts_allowed_log, nba_res$.resp.resid, xlab = "pts_allowed_log", col.int = NULL)
+arm::binnedplot(nba_res$FTA, nba_res$.resp.resid, xlab = "FTA", col.int = NULL)
+arm::binnedplot(nba_res$reb, nba_res$.resp.resid, xlab = "reb", col.int = NULL)
+arm::binnedplot(nba_res$SEASON, nba_res$.resp.resid, xlab = "SEASON", col.int = NULL)
+arm::binnedplot(nba_res$TO, nba_res$.resp.resid, xlab = "TO", col.int = NULL)
+arm::binnedplot(nba_res$fg3_pct, nba_res$.resp.resid, xlab = "fg3_pct", col.int = NULL)
+```
+
+```{r}
+# Checking model accuracy using concordant/discordant pairs
+p_lrm <- lrm(win ~ FG3A  + log(pts_allowed) + FTA  + OREB + DREB + TO, data = final_data) 
+# SEASON IS NOT INCLUDED
+# We appear to have a moderately strong association between our predictors and winning
+p_lrm$stats[c("Dxy", "Gamma", "Tau-a")]
 ```
 
 PLOTS: win v 3PA:
@@ -253,31 +291,4 @@ plot(lm_preds, show_data = TRUE) +
 lm_preds <- ggpredict(nba_glm2, terms = c("fg3_pct", "pts_allowed"))
 plot(lm_preds, show_data = TRUE) + 
   labs(title="Predicted Probability of winning based on 3 pointers attempted and points allowed", x="3-point field goal percentage", y="Predicted probability of winning")
-```
-
-RESIDUAL PLOTS:
-
-```{r}
-nba_res <- augment(nba_glm2, type.predict= "response") |>
-  dplyr::mutate(.resp.resid = resid(nba_glm2, type= "response"))
-
-# Avg. resids vs. predicted values
-arm::binnedplot(nba_glm2$linear.predictors, nba_res$.resp.resid, 
-                xlab = "Predicted odds", 
-                main = "Binned Residual vs. Predicted Values", 
-                col.int = FALSE)
-
-# Individual Binned Residual Plots
-arm::binnedplot(nba_res$FG3A, nba_res$.resp.resid, xlab = "FG3A", col.int = NULL)
-arm::binnedplot(nba_res$pts_allowed_log, nba_res$.resp.resid, xlab = "pts_allowed_log", col.int = NULL)
-arm::binnedplot(nba_res$FTA, nba_res$.resp.resid, xlab = "FTA", col.int = NULL)
-arm::binnedplot(nba_res$reb, nba_res$.resp.resid, xlab = "reb", col.int = NULL)
-arm::binnedplot(nba_res$SEASON, nba_res$.resp.resid, xlab = "SEASON", col.int = NULL)
-arm::binnedplot(nba_res$TO, nba_res$.resp.resid, xlab = "TO", col.int = NULL)
-arm::binnedplot(nba_res$fg3_pct, nba_res$.resp.resid, xlab = "fg3_pct", col.int = NULL)
-```
-
-```{r}
-p_lrm <- lrm(win ~ FG3A  + log(pts_allowed) + FTA  + OREB + DREB + TO, data = final_data) #SEASON IS NOT INCLUDED
-p_lrm$stats[c("Dxy", "Gamma", "Tau-a")]
 ```
