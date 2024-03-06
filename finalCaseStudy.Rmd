@@ -25,13 +25,18 @@ library(effects)
 library(tidyr)
 library(ggplot2)
 library(rms)
+
+final_data <- final_data %>%
+  mutate(pts_allowed_log = log(pts_allowed))
 ```
 
 3 POINT ATTEMPTED UNIVARIATE PLOT: - RIGHT SKEW
 
 ```{r}
-gf_boxplot(~FG3A, data=final_data)
-gf_histogram(~FG3A, data=final_data)
+gf_boxplot(~FG3A, data=final_data) + 
+  theme_bw()
+gf_histogram(~FG3A, data=final_data) + 
+  theme_bw()
 ```
 
 ```{r}
@@ -56,7 +61,7 @@ summary(nba_glm)
 ```
 
 ```{r}
-nba_glm2 <- glm(win ~ FG3A + fg3_pct  + log(pts_allowed) + FTA  + reb + TO + SEASON + FG3A:SEASON + log(pts_allowed):SEASON, data = final_data, family = "binomial")
+nba_glm2 <- glm(win ~ FG3A + fg3_pct  + pts_allowed_log + FTA  + reb + TO + SEASON + FG3A:SEASON + log(pts_allowed):SEASON, data = final_data, family = "binomial")
 summary(nba_glm2)
 1 - pchisq(45192, 53094) #ADEQUATE
 ```
@@ -123,7 +128,7 @@ win v DREB
 lm_preds <- ggpredict(nba_glm, terms = c("DREB"))
 plot(lm_preds, show_data = TRUE) + 
   labs(title="Predicted Probability of winning based on DREB", x="DREB", y="Predicted probability of winning")
->>>>>>> 0bf3a88872e7f0a7cb677c6ccd4cb5f62af21253
+#>>>>>>> 0bf3a88872e7f0a7cb677c6ccd4cb5f62af21253
 ```
 
 win v TO
@@ -149,20 +154,23 @@ plot(lm_preds, show_data = TRUE) +
 RESIDUAL PLOTS:
 
 ```{r}
-nba_res <- augment(nba_glm, type.predict= "response") |>
-  dplyr::mutate(.resp.resid = resid(nba_glm, type= "response"))
+nba_res <- augment(nba_glm2, type.predict= "response") |>
+  dplyr::mutate(.resp.resid = resid(nba_glm2, type= "response"))
 
 # Avg. resids vs. predicted values
-arm::binnedplot(nba_glm$linear.predictors, nba_res$.resp.resid, 
+arm::binnedplot(nba_glm2$linear.predictors, nba_res$.resp.resid, 
                 xlab = "Predicted odds", 
                 main = "Binned Residual vs. Predicted Values", 
                 col.int = FALSE)
-```
 
-```{r}
-model_aug <-augment(model) |>
-  mutate(resid = resid(model, type="response"))
-arm::binnedplot(model_aug$FG3A, model_aug$resid, xlab="FG3A", col.int=NULL)
+# Individual Binned Residual Plots
+arm::binnedplot(nba_res$FG3A, nba_res$.resp.resid, xlab = "FG3A", col.int = NULL)
+arm::binnedplot(nba_res$pts_allowed_log, nba_res$.resp.resid, xlab = "pts_allowed_log", col.int = NULL)
+arm::binnedplot(nba_res$FTA, nba_res$.resp.resid, xlab = "FTA", col.int = NULL)
+arm::binnedplot(nba_res$reb, nba_res$.resp.resid, xlab = "reb", col.int = NULL)
+arm::binnedplot(nba_res$SEASON, nba_res$.resp.resid, xlab = "SEASON", col.int = NULL)
+arm::binnedplot(nba_res$TO, nba_res$.resp.resid, xlab = "TO", col.int = NULL)
+arm::binnedplot(nba_res$fg3_pct, nba_res$.resp.resid, xlab = "fg3_pct", col.int = NULL)
 ```
 
 ```{r}
