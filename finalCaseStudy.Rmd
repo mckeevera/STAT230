@@ -148,14 +148,14 @@ gf_jitter(pts_allowed~SEASON, data=final_data) %>% gf_lm()+ theme_bw()
 ### **Fitting the Model, Wald's Tests, Deviance GoF test**
 
 ```{r}
-nba_glm <- glm(win ~ FG3A  + log(pts_allowed) + FTA  + OREB + DREB + TO + SEASON + FG3A:SEASON, data = final_data, family = "binomial")
+nba_glm <- glm(win ~ FG3A  + log(pts_allowed) + FTA  + OREB + DREB + TO + SEASON + FG3A:SEASON + log(pts_allowed):SEASON, data = final_data, family = "quasibinomial")
 summary(nba_glm)
-1 - pchisq(53647, 53095) #INADEQUACY
+1 - pchisq(53624, 53094) #INADEQUACY
 ```
 
 ```{r}
 # Fitting the model
-nba_glm2 <- glm(win ~ FG3A + fg3_pct  + pts_allowed_log + FTA  + reb + TO + SEASON + FG3A:SEASON + log(pts_allowed):SEASON, data = final_data, family = "binomial")
+nba_glm2 <- glm(win ~ FG3A + fg3_pct  + log(pts_allowed) + FTA  + reb + TO + SEASON + FG3A:SEASON + log(pts_allowed):SEASON, data = final_data, family = "binomial")
 summary(nba_glm2)
 ```
 
@@ -175,7 +175,7 @@ summary(nba_glm2)
 ```{r, message = FALSE, warning = FALSE}
 # Checking for correlations between variables that could result in multicollinearity
 final_data |> 
-  ggpairs(columns = c("win", "FG3A", "fg3_pct", "pts_allowed_log", "FTA", "reb", "TO", "SEASON"))
+  ggpairs(columns = c("win", "FG3A", "fg3_pct", "pts_allowed", "FTA", "reb", "TO", "SEASON"))
 ```
 
 ```{r}
@@ -243,7 +243,7 @@ plot(lm_preds, show_data = TRUE) +
 win v pts allowed:
 
 ```{r}
-lm_preds <- ggpredict(nba_glm2, terms = c("pts_allowed"))
+lm_preds <- ggpredict(nba_glm2, terms = c("pts_allowed", "SEASON"))
 plot(lm_preds, show_data = TRUE) + 
   labs(title="Predicted Probability of winning based on pts_allowed", x="pts_allowed", y="Predicted probability of winning")
 ```
