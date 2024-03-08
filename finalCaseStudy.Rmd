@@ -159,6 +159,12 @@ summary(nba_glm)
 nba_glm2 <- glm(win ~ FG3A + fg3_pct  + log(pts_allowed) + FTA  + reb + TO, data = final_data, family = "binomial")
 summary(nba_glm2)
 ```
+```{r}
+nba_glm2_reduced <-glm(win ~ log(pts_allowed) + FTA  + reb + TO, data = final_data, family = "binomial")
+anova(nba_glm2_reduced,nba_glm2,test="LRT")
+```
+
+
 
 Table 1:
 
@@ -304,7 +310,7 @@ plot(lm_preds, show_data = TRUE) +
 ```{r}
 lm_preds <- ggpredict(nba_glm2, terms = c("FG3A", "fg3_pct"))
 plot(lm_preds, show_data = TRUE) + 
-  labs(title="Predicted Probability of winning based on 3 pointers attempted and points allowed", x="3-point field goal percentage", y="Predicted probability of winning")
+  labs(title="Predicted Probability of winning based on 3 pointers attempted and 3 pt %", x="3-point field goals attempted", y="Predicted probability of winning")
 ```
 
 RESIDUAL PLOTS:
