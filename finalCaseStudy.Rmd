@@ -163,15 +163,15 @@ summary(nba_glm2)
 Table 1:
 
 | Variable              | Coefficient | Wald's Test p-value |
-|-----------------------|------------:|---------------------|
-| Intercept             |      -102.9 | \< 0.001            |
-| 3-point Attempts      |     0.03579 | \< 0.001            |
-| 3-point Percentage    |       11.39 | \< 0.001            |
-| log(Points Allowed)   |      -14.04 | \< 0.001            |
-| Free Throws Attempted |      0.1119 | \< 0.001            |
-| Rebounds              |     0.09428 | \< 0.001            |
-| Turnovers             |     -0.1181 | \< 0.001            |
-| Season                |     0.07841 | \< 0.001            |
+|-----------------------|------------:|--------------------:|
+| Intercept             |      -102.9 |            \< 0.001 |
+| 3-point Attempts      |     0.03579 |            \< 0.001 |
+| 3-point Percentage    |       11.39 |            \< 0.001 |
+| log(Points Allowed)   |      -14.04 |            \< 0.001 |
+| Free Throws Attempted |      0.1119 |            \< 0.001 |
+| Rebounds              |     0.09428 |            \< 0.001 |
+| Turnovers             |     -0.1181 |            \< 0.001 |
+| Season                |     0.07841 |            \< 0.001 |
 
 ```{r}
 # Goodness of Fit test for the second logistic model that indicates our model is adequate
