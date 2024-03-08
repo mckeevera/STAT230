@@ -155,7 +155,7 @@ summary(nba_glm)
 
 ```{r}
 # Fitting the model
-nba_glm2 <- glm(win ~ FG3A + fg3_pct  + log(pts_allowed) + FTA  + reb + TO + SEASON + FG3A:SEASON + log(pts_allowed):SEASON, data = final_data, family = "binomial")
+nba_glm2 <- glm(win ~ FG3A + fg3_pct  + log(pts_allowed) + FTA  + reb + TO + SEASON, data = final_data, family = "binomial")
 summary(nba_glm2)
 ```
 
@@ -167,7 +167,7 @@ summary(nba_glm2)
 
 ```{r}
 # Goodness of Fit test for the second logistic model that indicates our model is adequate
-1 - pchisq(45192, 53094)
+1 - pchisq(45195, 53096)
 ```
 
 ### **Checking Model Assumptions**
