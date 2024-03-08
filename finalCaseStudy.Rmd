@@ -36,7 +36,7 @@ games <- read.csv("games.csv")
 # Converting player data in each game to be team data in each game
 player_data <- by_player %>%
   group_by(GAME_ID, TEAM_ID) %>%
-  summarize(FGM = sum(FGM, na.rm = TRUE),
+  summarise(FGM = sum(FGM, na.rm = TRUE),
             FGA = sum(FGA, na.rm = TRUE),
             FG3M = sum(FG3M, na.rm = TRUE),
             FG3A = sum(FG3A, na.rm = TRUE),
@@ -148,6 +148,7 @@ gf_jitter(pts_allowed~SEASON, data=final_data) %>% gf_lm()+ theme_bw()
 ### **Fitting the Model, Wald's Tests, Deviance GoF test**
 
 ```{r}
+# Fitting an inadequate attempt at a model
 nba_glm <- glm(win ~ FG3A  + log(pts_allowed) + FTA  + OREB + DREB + TO + SEASON + FG3A:SEASON + log(pts_allowed):SEASON, data = final_data, family = "quasibinomial")
 summary(nba_glm)
 1 - pchisq(53624, 53094) #INADEQUACY
@@ -159,11 +160,18 @@ nba_glm2 <- glm(win ~ FG3A + fg3_pct  + log(pts_allowed) + FTA  + reb + TO + SEA
 summary(nba_glm2)
 ```
 
-| Variable | Coefficient  | Wald's Test p-value |
-|----------|--------------|---------------------|
-|          |              |                     |
-|          |              |                     |
-|          |              |                     |
+Table 1:
+
+| Variable              | Coefficient | Wald's Test p-value |
+|-----------------------|------------:|---------------------|
+| Intercept             |      -102.9 | \< 0.001            |
+| 3-point Attempts      |     0.03579 | \< 0.001            |
+| 3-point Percentage    |       11.39 | \< 0.001            |
+| log(Points Allowed)   |      -14.04 | \< 0.001            |
+| Free Throws Attempted |      0.1119 | \< 0.001            |
+| Rebounds              |     0.09428 | \< 0.001            |
+| Turnovers             |     -0.1181 | \< 0.001            |
+| Season                |     0.07841 | \< 0.001            |
 
 ```{r}
 # Goodness of Fit test for the second logistic model that indicates our model is adequate
@@ -216,7 +224,7 @@ arm::binnedplot(nba_glm2$linear.predictors, nba_res$.resp.resid,
 
 # Individual Binned Residual Plots
 arm::binnedplot(nba_res$FG3A, nba_res$.resp.resid, xlab = "FG3A", col.int = NULL)
-arm::binnedplot(nba_res$pts_allowed_log, nba_res$.resp.resid, xlab = "pts_allowed_log", col.int = NULL)
+#arm::binnedplot(nba_res$pts_allowed, nba_res$.resp.resid, xlab = "pts_allowed_log", col.int = NULL)
 arm::binnedplot(nba_res$FTA, nba_res$.resp.resid, xlab = "FTA", col.int = NULL)
 arm::binnedplot(nba_res$reb, nba_res$.resp.resid, xlab = "reb", col.int = NULL)
 arm::binnedplot(nba_res$SEASON, nba_res$.resp.resid, xlab = "SEASON", col.int = NULL)
@@ -226,7 +234,7 @@ arm::binnedplot(nba_res$fg3_pct, nba_res$.resp.resid, xlab = "fg3_pct", col.int 
 
 ```{r}
 # Checking model accuracy using concordant/discordant pairs
-p_lrm <- lrm(win ~ FG3A  + log(pts_allowed) + FTA  + OREB + DREB + TO, data = final_data) 
+p_lrm <- lrm(win ~ FG3A  + log(pts_allowed) + FTA  + reb + TO, data = final_data) 
 # SEASON IS NOT INCLUDED
 # We appear to have a moderately strong association between our predictors and winning
 p_lrm$stats[c("Dxy", "Gamma", "Tau-a")]
@@ -253,11 +261,8 @@ win v free throws attempted
 ```{r}
 lm_preds <- ggpredict(nba_glm2, terms = c("FG3A", "fg3_pct"))
 plot(lm_preds, show_data = TRUE) + 
-<<<<<<< HEAD
   labs(title="Predicted Probability of winning based on 3FGA and Percentage", x="FG3A", y="Predicted probability of winning")
-=======
-labs(title="Predicted Probability of winning based on 3FGA and Percentage", x="FG3A", y="Predicted probability of winning")
->>>>>>> c8fe087d0753d158d5ac282a88a2489444bd5162
+
 ```
 
 win v OREB
@@ -274,10 +279,6 @@ win v DREB
 lm_preds <- ggpredict(nba_glm, terms = c("DREB"))
 plot(lm_preds, show_data = TRUE) + 
   labs(title="Predicted Probability of winning based on DREB", x="DREB", y="Predicted probability of winning")
-<<<<<<< HEAD
-=======
-#>>>>>>> 0bf3a88872e7f0a7cb677c6ccd4cb5f62af21253
->>>>>>> c8fe087d0753d158d5ac282a88a2489444bd5162
 ```
 
 win v TO
@@ -287,7 +288,6 @@ lm_preds <- ggpredict(nba_glm, terms = c("TO"))
 plot(lm_preds, show_data = TRUE) + 
   labs(title="Predicted Probability of winning based on TO", x="TO", y="Predicted probability of winning")
 ```
-  
 
 ```{r}
 lm_preds <- ggpredict(nba_glm2, terms = c("FG3A", "pts_allowed"))
@@ -300,7 +300,6 @@ lm_preds <- ggpredict(nba_glm2, terms = c("fg3_pct", "pts_allowed"))
 plot(lm_preds, show_data = TRUE) + 
   labs(title="Predicted Probability of winning based on 3 pointers attempted and points allowed", x="3-point field goal percentage", y="Predicted probability of winning")
 ```
-<<<<<<< HEAD
 
 ```{r}
 lm_preds <- ggpredict(nba_glm2, terms = c("FG3A", "fg3_pct"))
@@ -322,8 +321,8 @@ arm::binnedplot(nba_glm$linear.predictors, nba_res$.resp.resid,
 ```
 
 ```{r}
-model_aug <-augment(model) |>
-  mutate(resid = resid(model, type="response"))
+model_aug <- augment(nba_glm2) |>
+  mutate(resid = resid(nba_glm2, type="response"))
 arm::binnedplot(model_aug$FG3A, model_aug$resid, xlab="FG3A", col.int=NULL)
 ```
 
@@ -331,5 +330,3 @@ arm::binnedplot(model_aug$FG3A, model_aug$resid, xlab="FG3A", col.int=NULL)
 p_lrm <- lrm(win ~ FG3A  + log(pts_allowed) + FTA  + OREB + DREB + TO, data = final_data) #SEASON IS NOT INCLUDED
 p_lrm$stats[c("Dxy", "Gamma", "Tau-a")]
 ```
-=======
->>>>>>> c8fe087d0753d158d5ac282a88a2489444bd5162
