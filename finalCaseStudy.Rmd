@@ -156,7 +156,7 @@ summary(nba_glm)
 
 ```{r}
 # Fitting the model
-nba_glm2 <- glm(win ~ FG3A + fg3_pct  + log(pts_allowed) + FTA  + reb + TO + SEASON, data = final_data, family = "binomial")
+nba_glm2 <- glm(win ~ FG3A + fg3_pct  + log(pts_allowed) + FTA  + reb + TO, data = final_data, family = "binomial")
 summary(nba_glm2)
 ```
 
@@ -175,7 +175,7 @@ Table 1:
 
 ```{r}
 # Goodness of Fit test for the second logistic model that indicates our model is adequate
-1 - pchisq(45195, 53096)
+1 - pchisq(45863, 53097)
 ```
 
 ### **Checking Model Assumptions**
@@ -327,6 +327,6 @@ arm::binnedplot(model_aug$FG3A, model_aug$resid, xlab="FG3A", col.int=NULL)
 ```
 
 ```{r}
-p_lrm <- lrm(win ~ FG3A  + log(pts_allowed) + FTA  + OREB + DREB + TO, data = final_data) #SEASON IS NOT INCLUDED
+p_lrm <- lrm(win ~  FG3A + fg3_pct  + log(pts_allowed) + FTA  + reb + TO, data = final_data) #SEASON IS NOT INCLUDED
 p_lrm$stats[c("Dxy", "Gamma", "Tau-a")]
 ```
