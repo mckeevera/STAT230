@@ -282,20 +282,12 @@ plot(lm_preds, show_data = TRUE) +
 
 ```
 
-win v OREB
+win v REB
 
 ```{r}
-lm_preds <- ggpredict(nba_glm, terms = c("OREB"))
+lm_preds <- ggpredict(nba_glm, terms = c("reb"))
 plot(lm_preds, show_data = TRUE) + 
-  labs(title="Predicted Probability of winning based on OREB", x="OREB", y="Predicted probability of winning")
-```
-
-win v DREB
-
-```{r}
-lm_preds <- ggpredict(nba_glm, terms = c("DREB"))
-plot(lm_preds, show_data = TRUE) + 
-  labs(title="Predicted Probability of winning based on DREB", x="DREB", y="Predicted probability of winning")
+  labs(title="Predicted Probability of winning based on reb", x="reb", y="Predicted probability of winning")
 ```
 
 win v TO
