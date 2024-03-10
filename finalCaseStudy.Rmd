@@ -135,7 +135,7 @@ gf_histogram(~FG3A, data=final_data) +
 # Figure 1
 gf_jitter(FG3A~SEASON, data=final_data) %>% gf_lm() + 
   labs(x="Season", y="3-point Field Goals Attempted", 
-       title="Number of 3-Point field goals attempted in-game over different seasons") +      theme_bw()
+       title="Number of 3-Point field goals attempted in-game over different seasons") + theme_bw()
 ```
 
 ```{r, warning = FALSE}
