@@ -132,6 +132,7 @@ gf_histogram(~FG3A, data=final_data) +
 ```
 
 ```{r, warning = FALSE}
+<<<<<<< HEAD
 # Figure 1
 gf_jitter(FG3A~SEASON, data=final_data) %>% gf_lm() + 
   labs(x="Season", y="3-point Field Goals Attempted", 
@@ -140,31 +141,27 @@ gf_jitter(FG3A~SEASON, data=final_data) %>% gf_lm() +
 
 ```{r, warning = FALSE}
 # Figure 1
+=======
+# Figure 2 and Figure 3
+>>>>>>> 691503376f63f4ceb7240d54f8c8da76135d1ab2
 gf_jitter(win~FG3A, data=final_data) %>% gf_lm() + 
   labs(x="3-point Field Goals Attempted", y="Win", 
        title="Win Vs 3FGA") +      theme_bw()
 gf_jitter(win~reb, data=final_data) %>% gf_lm() + 
   labs(x="Rebounds", y="Win", 
-       title="Win Vs Reb") +      theme_bw()
-
+       title="Win Vs Reb") +      
+  theme_bw()
 ```
 
-```{r}
+```{r, warning = FALSE}
 # Additional plots exploring the data
 gf_jitter(FG3A~pts_allowed, data=final_data) %>% gf_lm()+ theme_bw()
+# Figure 1
 gf_jitter(fg3_pct~FG3A, data=final_data) %>% gf_lm()+ theme_bw() +
   labs(x="3-point Field Goals Attempted", y="3-Point Field Goal Percentage", title="3-point % against 3-point shots attempted")
-gf_jitter(pts_allowed~SEASON, data=final_data) %>% gf_lm()+ theme_bw()
 ```
 
 ### **Fitting the Model, Wald's Tests, Deviance GoF test**
-
-```{r}
-# Fitting an inadequate attempt at a model
-nba_glm <- glm(win ~ FG3A  + log(pts_allowed) + FTA  + OREB + DREB + TO + SEASON + FG3A:SEASON + log(pts_allowed):SEASON, data = final_data, family = "quasibinomial")
-summary(nba_glm)
-1 - pchisq(53624, 53094) #INADEQUACY
-```
 
 ```{r}
 # Fitting the model
@@ -175,7 +172,7 @@ summary(nba_glm2)
 ```{r}
 # LRT Test
 nba_glm2_reduced <-glm(win ~ log(pts_allowed) + FTA  + reb + TO, data = final_data, family = "binomial")
-anova(nba_glm2_reduced,nba_glm2,test="LRT")
+anova(nba_glm2_reduced, nba_glm2,test = "LRT")
 ```
 
 Table 1:
@@ -231,7 +228,8 @@ print(influential_obs)
 
 # Augmenting Data
 nba_res <- augment(nba_glm2, type.predict= "response") |>
-  dplyr::mutate(.resp.resid = resid(nba_glm2, type= "response"))
+  dplyr::mutate(.resp.resid = resid(nba_glm2, type= "response"),
+                pts_allowed_log = na.omit(final_data)$pts_allowed)
 
 # Avg. resids vs. predicted values
 arm::binnedplot(nba_glm2$linear.predictors, nba_res$.resp.resid, 
@@ -241,10 +239,9 @@ arm::binnedplot(nba_glm2$linear.predictors, nba_res$.resp.resid,
 
 # Individual Binned Residual Plots
 arm::binnedplot(nba_res$FG3A, nba_res$.resp.resid, xlab = "FG3A", col.int = NULL)
-#arm::binnedplot(nba_res$pts_allowed, nba_res$.resp.resid, xlab = "pts_allowed_log", col.int = NULL)
+arm::binnedplot(nba_res$pts_allowed_log, nba_res$.resp.resid, xlab = "pts_allowed_log", col.int = NULL)
 arm::binnedplot(nba_res$FTA, nba_res$.resp.resid, xlab = "FTA", col.int = NULL)
 arm::binnedplot(nba_res$reb, nba_res$.resp.resid, xlab = "reb", col.int = NULL)
-arm::binnedplot(nba_res$SEASON, nba_res$.resp.resid, xlab = "SEASON", col.int = NULL)
 arm::binnedplot(nba_res$TO, nba_res$.resp.resid, xlab = "TO", col.int = NULL)
 arm::binnedplot(nba_res$fg3_pct, nba_res$.resp.resid, xlab = "fg3_pct", col.int = NULL)
 ```
@@ -252,90 +249,24 @@ arm::binnedplot(nba_res$fg3_pct, nba_res$.resp.resid, xlab = "fg3_pct", col.int 
 ```{r}
 # Checking model accuracy using concordant/discordant pairs
 p_lrm <- lrm(win ~ FG3A  + log(pts_allowed) + FTA  + reb + TO, data = final_data) 
-# SEASON IS NOT INCLUDED
+
 # We appear to have a moderately strong association between our predictors and winning
 p_lrm$stats[c("Dxy", "Gamma", "Tau-a")]
 ```
 
-PLOTS: win v 3PA:
+### Effects Plots
 
 ```{r}
-lm_preds <- ggpredict(nba_glm2, terms = c("FG3A"))
-plot(lm_preds, show_data = TRUE) + 
-  labs(title="Predicted Probability of winning based on 3 points shot", x="3FGA", y="Predicted probability of winning")
-```
-
-win v pts allowed:
-
-```{r}
-lm_preds <- ggpredict(nba_glm2, terms = c("pts_allowed", "SEASON"))
-plot(lm_preds, show_data = TRUE) + 
-  labs(title="Predicted Probability of winning based on pts_allowed", x="pts_allowed", y="Predicted probability of winning")
-```
-
-win v free throws attempted
-
-```{r}
+# Figure 4
 lm_preds <- ggpredict(nba_glm2, terms = c("FG3A", "fg3_pct"))
 plot(lm_preds, show_data = TRUE) + 
   labs(title="Predicted Probability of winning based on 3FGA and Percentage", x="FG3A", y="Predicted probability of winning")
 
 ```
 
-win v REB
-
 ```{r}
-lm_preds <- ggpredict(nba_glm, terms = c("reb"))
-plot(lm_preds, show_data = TRUE) + 
-  labs(title="Predicted Probability of winning based on reb", x="reb", y="Predicted probability of winning")
-```
-
-win v TO
-
-```{r}
-lm_preds <- ggpredict(nba_glm, terms = c("TO"))
-plot(lm_preds, show_data = TRUE) + 
-  labs(title="Predicted Probability of winning based on TO", x="TO", y="Predicted probability of winning")
-```
-
-```{r}
+# Figure 5
 lm_preds <- ggpredict(nba_glm2, terms = c("FG3A", "pts_allowed"))
 plot(lm_preds, show_data = TRUE) + 
   labs(title="Predicted Probability of winning based on 3 pointers attempted and points allowed", x="3-point field goals attempted", y="Predicted probability of winning")
-```
-
-```{r}
-lm_preds <- ggpredict(nba_glm2, terms = c("fg3_pct", "pts_allowed"))
-plot(lm_preds, show_data = TRUE) + 
-  labs(title="Predicted Probability of winning based on 3 pointers attempted and points allowed", x="3-point field goal percentage", y="Predicted probability of winning")
-```
-
-```{r}
-lm_preds <- ggpredict(nba_glm2, terms = c("FG3A", "fg3_pct"))
-plot(lm_preds, show_data = TRUE) + 
-  labs(title="Predicted Probability of winning based on 3 pointers attempted and 3 pt %", x="3-point field goals attempted", y="Predicted probability of winning")
-```
-
-RESIDUAL PLOTS:
-
-```{r}
-nba_res <- augment(nba_glm, type.predict= "response") |>
-  dplyr::mutate(.resp.resid = resid(nba_glm, type= "response"))
-
-# Avg. resids vs. predicted values
-arm::binnedplot(nba_glm$linear.predictors, nba_res$.resp.resid, 
-                xlab = "Predicted odds", 
-                main = "Binned Residual vs. Predicted Values", 
-                col.int = FALSE)
-```
-
-```{r}
-model_aug <- augment(nba_glm2) |>
-  mutate(resid = resid(nba_glm2, type="response"))
-arm::binnedplot(model_aug$FG3A, model_aug$resid, xlab="FG3A", col.int=NULL)
-```
-
-```{r}
-p_lrm <- lrm(win ~  FG3A + fg3_pct  + log(pts_allowed) + FTA  + reb + TO, data = final_data) #SEASON IS NOT INCLUDED
-p_lrm$stats[c("Dxy", "Gamma", "Tau-a")]
 ```
